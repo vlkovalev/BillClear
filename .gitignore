@@ -1,0 +1,11 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+*.err
+.env
+.env.local
+.write_test
+samples/telus_bills/*.pdf
+samples/virgin_bills/*.pdf

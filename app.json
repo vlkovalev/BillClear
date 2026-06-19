@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "BillClear",
+    "slug": "billclear",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "billclear",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f7f5ef"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.billclear.app",
+      "icon": "./assets/ios-icon.png",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "BillClear lets you select a saved bill photo so it can explain charges and compare month-to-month changes."
+      }
+    },
+    "android": {
+      "package": "com.billclear.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#f7f5ef"
+      },
+      "permissions": [
+        "READ_MEDIA_IMAGES"
+      ]
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "extra": {
+      "privacyMode": "local-parser-first"
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
