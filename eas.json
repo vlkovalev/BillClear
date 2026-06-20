@@ -14,12 +14,12 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "REPLACE_WITH_DEPLOYED_BETA_API_URL"
+        "EXPO_PUBLIC_API_URL": "https://billclear.onrender.com"
       }
     },
     "production": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "REPLACE_WITH_PRODUCTION_API_URL"
+        "EXPO_PUBLIC_API_URL": "https://billclear.onrender.com"
       }
     }
   },
