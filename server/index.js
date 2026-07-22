@@ -18,6 +18,7 @@ const allowedOrigins = (process.env.CORS_ORIGINS ?? "")
   .filter(Boolean);
 const scanLimit = process.env.SCAN_RATE_LIMIT ?? "30";
 const model = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+const mockFallbackEnabled = process.env.ALLOW_MOCK_ANALYSIS !== "false";
 const claudeAnalyzer = createClaudeAnalyzer({
   apiKey: process.env.ANTHROPIC_API_KEY,
   model
@@ -71,7 +72,7 @@ app.get("/health", (_req, res) => {
     providers: {
       localParser: true,
       claude: Boolean(claudeAnalyzer),
-      mock: true
+      mockFallbackEnabled
     }
   });
 });
@@ -115,7 +116,7 @@ app.post("/api/analyze-bill", scanRateLimiter, async (req, res) => {
       return;
     }
 
-    if (process.env.ALLOW_MOCK_ANALYSIS === "false") {
+    if (!mockFallbackEnabled) {
       res.status(422).json({
         error:
           "BillClear could not parse this bill privately. Enable cloud AI fallback or try another supported carrier bill."
