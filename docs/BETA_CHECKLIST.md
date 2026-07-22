@@ -2,8 +2,8 @@
 
 ## Required Before TestFlight / Internal Testing
 
-- Deploy the backend over HTTPS.
-- Set `EXPO_PUBLIC_API_URL` in `eas.json` preview profile to the beta API URL.
+- Deploy the backend over HTTPS on Netlify.
+- Set `EXPO_PUBLIC_API_URL` in `eas.json` preview/production profiles to the Netlify API URL.
 - Set production backend environment variables from `server/.env.example`.
 - Confirm `ALLOW_MOCK_ANALYSIS=false` for real beta users unless the build is clearly marked as a demo.
 - Host public privacy policy and support contact pages.
