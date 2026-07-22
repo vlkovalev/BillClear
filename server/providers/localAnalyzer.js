@@ -54,7 +54,9 @@ async function extractPdfText(bill) {
     const pdfParse = require("pdf-parse");
     const parsed = await pdfParse(Buffer.from(bill.fileBase64, "base64"));
     return parsed.text || "";
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown PDF extraction error.";
+    console.warn(`[LocalParser] PDF text extraction failed: ${message}`);
     return "";
   }
 }

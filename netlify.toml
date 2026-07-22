@@ -9,7 +9,7 @@ NODE_VERSION = "20"
 
 [functions]
 node_bundler = "esbuild"
-included_files = ["providers/**", "analyzeBillPrompt.js"]
+included_files = ["providers/**", "analyzeBillPrompt.js", "node_modules/pdf-parse/lib/pdf.js/**"]
 
 [[redirects]]
 from = "/health"
