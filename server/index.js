@@ -17,7 +17,7 @@ const allowedOrigins = (process.env.CORS_ORIGINS ?? "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 const scanLimit = process.env.SCAN_RATE_LIMIT ?? "30";
-const model = process.env.ANTHROPIC_MODEL ?? "claude-3-5-sonnet-20241022";
+const model = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
 const claudeAnalyzer = createClaudeAnalyzer({
   apiKey: process.env.ANTHROPIC_API_KEY,
   model
@@ -36,7 +36,7 @@ app.use(
     }
   })
 );
-app.use(express.json({ limit: process.env.JSON_BODY_LIMIT ?? "10mb" }));
+app.use(express.json({ limit: process.env.JSON_BODY_LIMIT ?? "6mb" }));
 
 function redactSensitiveData(input) {
   if (typeof input !== "string") {
@@ -77,7 +77,8 @@ app.get("/health", (_req, res) => {
 });
 
 app.post("/api/analyze-bill", scanRateLimiter, async (req, res) => {
-  const { fileBase64, fileName, fileType, mediaType, previousBill, allowCloudAi = false } = req.body ?? {};
+  const { fileBase64, fileName, fileType, mediaType, previousBills, previousBill, allowCloudAi = false } =
+    req.body ?? {};
   res.setHeader("Cache-Control", "no-store");
 
   if (!fileBase64 || !mediaType || !fileType) {
@@ -91,9 +92,16 @@ app.post("/api/analyze-bill", scanRateLimiter, async (req, res) => {
   }
 
   const currentBill = { fileBase64, fileName, fileType, mediaType };
+  // Accept the older single `previousBill` shape too, so any in-flight app
+  // build that hasn't picked up the multi-bill update yet keeps working.
+  const normalizedPreviousBills = Array.isArray(previousBills)
+    ? previousBills.filter(Boolean)
+    : previousBill
+      ? [previousBill]
+      : [];
 
   try {
-    const localAnalysis = await analyzeLocally({ currentBill, previousBill });
+    const localAnalysis = await analyzeLocally({ currentBill, previousBills: normalizedPreviousBills });
     if (localAnalysis) {
       validateAnalysis(localAnalysis);
       res.json(localAnalysis);
@@ -101,7 +109,7 @@ app.post("/api/analyze-bill", scanRateLimiter, async (req, res) => {
     }
 
     if (allowCloudAi && claudeAnalyzer) {
-      const cloudAnalysis = await claudeAnalyzer.analyze({ currentBill, previousBill });
+      const cloudAnalysis = await claudeAnalyzer.analyze({ currentBill, previousBills: normalizedPreviousBills });
       validateAnalysis(cloudAnalysis);
       res.json(cloudAnalysis);
       return;
@@ -138,9 +146,11 @@ app.post("/api/analyze-bill", scanRateLimiter, async (req, res) => {
   }
 });
 
-app.listen(port, () => {
-  console.log(`BillClear API listening on http://localhost:${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`BillClear API listening on http://localhost:${port}`);
+  });
+}
 
 function validateAnalysis(analysis) {
   if (!analysis || typeof analysis !== "object") {
@@ -151,3 +161,5 @@ function validateAnalysis(analysis) {
     throw new Error("Analysis JSON is missing charges or findings arrays.");
   }
 }
+
+module.exports = app;

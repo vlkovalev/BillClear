@@ -1,9 +1,9 @@
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 
 import { API_BASE_URL } from "../config";
 import { AnalyzeBillOptions, BillAnalysis, UploadedBill } from "../types";
 
-const MAX_UPLOAD_BYTES = 12 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 const EXTENSION_MEDIA_TYPES: Record<string, string> = {
   pdf: "application/pdf",
@@ -24,7 +24,7 @@ function guessMediaType(uploadedBill: UploadedBill): string {
 
 async function readBillPayload(uploadedBill: UploadedBill) {
   if (uploadedBill.size && uploadedBill.size > MAX_UPLOAD_BYTES) {
-    throw new Error("This bill is too large to scan right now. Please upload a smaller PDF or image under 12 MB.");
+    throw new Error("This bill is too large to scan on the beta backend. Please upload a smaller PDF or image under 4 MB.");
   }
 
   let fileBase64: string;
@@ -54,11 +54,11 @@ async function readBillPayload(uploadedBill: UploadedBill) {
  */
 export async function analyzeBill(
   uploadedBill: UploadedBill,
-  previousBill?: UploadedBill | null,
+  previousBills: UploadedBill[] = [],
   allowCloudAi = false
 ): Promise<BillAnalysis> {
   const currentPayload = await readBillPayload(uploadedBill);
-  const previousPayload = previousBill ? await readBillPayload(previousBill) : null;
+  const previousPayloads = await Promise.all(previousBills.map((bill) => readBillPayload(bill)));
 
   let response: Response;
   try {
@@ -67,7 +67,7 @@ export async function analyzeBill(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...currentPayload,
-        previousBill: previousPayload,
+        previousBills: previousPayloads,
         allowCloudAi
       })
     });

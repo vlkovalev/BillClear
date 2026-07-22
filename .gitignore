@@ -6,6 +6,7 @@ web-build/
 *.err
 .env
 .env.local
+.netlify/
 .write_test
 samples/telus_bills/*.pdf
 samples/virgin_bills/*.pdf

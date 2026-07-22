@@ -14,12 +14,12 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://billclear.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://billclear-app.netlify.app"
       }
     },
     "production": {
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://billclear.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://billclear-app.netlify.app"
       }
     }
   },
