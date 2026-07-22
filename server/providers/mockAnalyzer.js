@@ -3,6 +3,7 @@ function buildMockBillAnalysis(fileType) {
 
   return {
     provider: "mock",
+    category: "telecom",
     carrier: "Telus",
     billingPeriod: "May 13 - June 12, 2026",
     totalDue: 96.42,

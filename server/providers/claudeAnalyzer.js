@@ -11,9 +11,13 @@ function createClaudeAnalyzer({ apiKey, model }) {
   const anthropic = new Anthropic({ apiKey });
 
   return {
-    async analyze({ currentBill, previousBill }) {
+    async analyze({ currentBill, previousBills = [] }) {
       const currentContentBlock = buildClaudeFileBlock(currentBill);
-      const previousContentBlock = previousBill ? buildClaudeFileBlock(previousBill) : null;
+      const previousBlocks = previousBills.map((bill, index) => ({
+        bill,
+        index,
+        block: buildClaudeFileBlock(bill)
+      }));
 
       const message = await anthropic.messages.create({
         model,
@@ -23,15 +27,15 @@ function createClaudeAnalyzer({ apiKey, model }) {
           {
             role: "user",
             content: [
-              ...(previousContentBlock
-                ? [
-                    {
-                      type: "text",
-                      text: `Previous bill${previousBill.fileName ? ` named "${previousBill.fileName}"` : ""}:`
-                    },
-                    previousContentBlock
-                  ]
-                : []),
+              ...previousBlocks.flatMap(({ bill, index, block }) => [
+                {
+                  type: "text",
+                  text: `Previous bill ${index + 1} of ${previousBlocks.length}${
+                    bill.fileName ? ` named "${bill.fileName}"` : ""
+                  } (order as uploaded, not necessarily chronological — read the date on each bill):`
+                },
+                block
+              ]),
               {
                 type: "text",
                 text: `Current bill${currentBill.fileName ? ` named "${currentBill.fileName}"` : ""}:`
@@ -39,9 +43,10 @@ function createClaudeAnalyzer({ apiKey, model }) {
               currentContentBlock,
               {
                 type: "text",
-                text: previousContentBlock
-                  ? "Analyze the current bill and compare it with the previous bill. Return only the JSON object."
-                  : "Analyze this Canadian telecom bill. Return only the JSON object."
+                text:
+                  previousBlocks.length > 0
+                    ? `Analyze the current bill and compare it with the ${previousBlocks.length} previous bill(s) provided. If there is more than one previous bill, identify the trend across all of them (e.g. is the total climbing, and which charges are driving it), in addition to the usual current-vs-most-recent-previous comparison. Return only the JSON object.`
+                    : "Analyze this Canadian telecom bill. Return only the JSON object."
               }
             ]
           }
@@ -55,6 +60,7 @@ function createClaudeAnalyzer({ apiKey, model }) {
         .trim();
 
       return {
+        category: "telecom",
         ...parseClaudeJson(text),
         provider: "claude"
       };

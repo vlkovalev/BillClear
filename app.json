@@ -38,9 +38,6 @@
     },
     "extra": {
       "privacyMode": "local-parser-first"
-    },
-    "plugins": [
-      "expo-asset"
-    ]
+    }
   }
 }

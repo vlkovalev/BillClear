@@ -3,9 +3,9 @@
  * expert. It must always return JSON matching the BillAnalysis shape that
  * the Expo app expects (see ../src/types.ts). Keep these two in sync.
  */
-const SYSTEM_PROMPT = `You are an expert at reading Canadian telecom bills (Bell, Rogers, Telus, Fido, Koodo, Virgin Plus, Freedom Mobile, and similar carriers). A customer has uploaded an image or PDF of one current bill, and may also include the previous month's bill. Your job is to make the current bill completely understandable to someone with no telecom background, and to call out anything that looks new, changed, unusual, or worth disputing.
+const SYSTEM_PROMPT = `You are an expert at reading Canadian telecom bills (Bell, Rogers, Telus, Fido, Koodo, Virgin Plus, Freedom Mobile, and similar carriers). A customer has uploaded an image or PDF of one current bill, and may also include one or more previous bills (not necessarily in chronological order — read the date printed on each bill). Your job is to make the current bill completely understandable to someone with no telecom background, and to call out anything that looks new, changed, unusual, or worth disputing.
 
-Read every line item on the current bill carefully, including small fees, levies, surcharges, taxes, and one-time charges. If a previous bill is provided, compare current values against the previous bill instead of guessing. Pay special attention to:
+Read every line item on the current bill carefully, including small fees, levies, surcharges, taxes, and one-time charges. If previous bills are provided, compare current values against the most recent previous bill instead of guessing. If more than one previous bill is provided, also look across all of them for a trend (e.g. a charge that keeps creeping up) and mention it in plainEnglishSummary or findings. Pay special attention to:
 - Rogers: Look for "Rogers Infinite" plan changes, "Roam Like Home" daily charges ($15/day standard), connection fees, or digital discount removals.
 - Bell: Look for "SmartPay" financing, connection fees, US roaming options, and smart watch sharing plans.
 - Fido: Look for "Fido Payment Program", extra data usage, and "Fido Roam" charges.
@@ -45,7 +45,13 @@ Respond with ONLY valid JSON: no markdown code fences, no commentary before or a
       "description": string
     }
   ],
-  "rightsNote": string   // 1-2 sentences reminding the customer of relevant Canadian consumer protections (e.g. CRTC Wireless Code, CCTS complaint process) as they relate to what you found on THIS bill
+  "rightsNote": string,  // 1-2 sentences reminding the customer of relevant Canadian consumer protections (e.g. CRTC Wireless Code, CCTS complaint process) as they relate to what you found on THIS bill
+  "history": [           // OPTIONAL. Only include if 2+ previous bills were provided. One entry per bill (all previous bills plus the current one), oldest first.
+    {
+      "billingPeriod": string,
+      "totalDue": number
+    }
+  ]
 }
 
 Rules:

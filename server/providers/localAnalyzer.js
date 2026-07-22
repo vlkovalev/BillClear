@@ -321,14 +321,17 @@ function telusSectionId(serviceType) {
 }
 
 function parseVirgin(text) {
-  const billDate = matchText(/Bill Date.{0,60}?([A-Za-z]+ \d{1,2}, \d{4})/i, text) || "Unknown period";
+  const billDate =
+    matchText(/([A-Za-z]+ \d{1,2}, \d{4})\s*Bill Date/i, text) ||
+    matchText(/Bill Date.{0,60}?([A-Za-z]+ \d{1,2}, \d{4})/i, text) ||
+    "Unknown period";
   // "Total Amount Due" and its figure can be far apart once the PDF's column
-  // layout is flattened to text, so look ahead across a wider gap rather than
-  // requiring them to be adjacent (moneyBefore/moneyAfter assume adjacency).
+  // layout is flattened to text. Prefer the amount immediately before the
+  // label because the amount after it is often the GST line.
   const amountDue =
-    moneyAfterGap("Total Amount Due", text, 100) ??
     moneyBefore("Total amount due", text) ??
-    moneyBefore("Total amount to be charged to your credit card", text);
+    moneyBefore("Total amount to be charged to your credit card", text) ??
+    moneyAfterGap("Total Amount Due", text, 100);
 
   return {
     carrier: "Virgin Plus",
